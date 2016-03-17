@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  */
 public class SearcherLink {
 
-    public static List<String> gettLinks(String... strings) {
+    public static List<String> getLinks(String... strings) {
         List<String> answer = new ArrayList<>();
         Pattern pattern = Pattern.compile("((?<=href=\")(http:)*/*(\\w+(/|\\.))*(\\w*|%)*\\w*)(?=\")");
 

@@ -1,9 +1,5 @@
 import service.downloads.DownloaderWebPage;
-import service.linksHolder.LinksHolder;
 import java.util.Scanner;
-import java.util.concurrent.Future;
-
-import static java.lang.Thread.sleep;
 
 /**
  * @author Gladush Ivan
@@ -11,7 +7,6 @@ import static java.lang.Thread.sleep;
  */
 public class Main {
     public static void main(String[] args) {
-        LinksHolder lh = new LinksHolder();
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Input url site");

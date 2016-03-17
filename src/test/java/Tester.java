@@ -1,7 +1,5 @@
 import org.junit.Test;
 import service.searcherLinks.SearcherLink;
-import service.downloads.DownloaderWebPage;
-import service.linksHolder.LinksHolder;
 
 import java.util.List;
 
@@ -18,7 +16,7 @@ public class Tester {
         String text="href=\"http://skillbox.io\"sdfdghdfgdfhfdghsdgjdlfkjglkdfjgldfjlgkljdfgkjldfgkllhref=\"http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F\"";
         String firstAnswer="http://skillbox.io";
         String secondAnswer="http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F";
-        List<String> answer= SearcherLink.gettLinks(text);
+        List<String> answer= SearcherLink.getLinks(text);
         assertEquals(2,answer.size());
         assertEquals(true,firstAnswer.equals(answer.get(0)));
         assertEquals(true,secondAnswer.equals(answer.get(1)));
@@ -59,7 +57,7 @@ public class Tester {
                 "    Watching a Directory for Changes shows how to use the watch service to detect files that are added, removed or updated in one or more directories.\n" +
                 "    Other Useful Methods covers important API that didn't fit elsewhere in the lesson.\n" +
                 "    Legacy File I/O Code shows how to leverage Path functionality if you have older code using the java.io.File class. A table mapping java.io.File API to java.nio.file API is provided.\n";
-      List<String> answer= SearcherLink.gettLinks(text);
+      List<String> answer= SearcherLink.getLinks(text);
         assertEquals(0,answer.size());
     }
 
@@ -70,7 +68,7 @@ public class Tester {
         String firstAnswer="/vanya/gladush.com";
         String secondAnswer="/vanya/znaet/chto.reshaet%300%324";
         String thirdAnswer="/igladush.com";
-        List<String> answer= SearcherLink.gettLinks(text);
+        List<String> answer= SearcherLink.getLinks(text);
         assertEquals(3,answer.size());
 
         assertEquals(true,firstAnswer.equals(answer.get(0)));
@@ -83,7 +81,7 @@ public class Tester {
 
         String text = "<a href=\"http://www.quizful.net/test/java_se_basic\">some text</>";
         String firstAnswer = "http://www.quizful.net/test/java_se_basic";
-        List<String> answer=SearcherLink.gettLinks(text);
+        List<String> answer=SearcherLink.getLinks(text);
         assertEquals(1,answer.size());
         assertEquals(true,firstAnswer.equals(answer.get(0)));
     }

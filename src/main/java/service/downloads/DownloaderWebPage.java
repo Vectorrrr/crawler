@@ -1,6 +1,5 @@
 package service.downloads;
 
-import org.omg.PortableServer.SERVANT_RETENTION_POLICY_ID;
 import service.searcherLinks.SearcherLink;
 import service.linksHolder.LinksHolder;
 
@@ -85,7 +84,7 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
                 fileOutputStream.write(line.getBytes());//save line in file
                 fileOutputStream.write(SEPARATOR);      //move on next line
 
-                List<String> links = SearcherLink.gettLinks(line);
+                List<String> links = SearcherLink.getLinks(line);
 
                 if (numberLink == 0) {
                     linksHolder.addNewLinks(links);
@@ -139,9 +138,9 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
     }
 
     private void downloadSubsidiariesPages() {
-        System.out.println("#########ALLLL LINKSSSSS##########" + linksHolder.countProcessingLink());
+        System.out.println("#########COUNT ALL LINKS ##########" + linksHolder.countProcessingLink());
         List<DownloaderWebPage> tasks = new ArrayList<>();
-        List<Future<LinksHolder>> resaults = new ArrayList<>();
+        List<Future<LinksHolder>> results = new ArrayList<>();
         int numb = 0;
         while (linksHolder.countProcessingLink() > 0) {
             System.out.println("!!!!!!!!!!!! " + numb);
@@ -155,11 +154,11 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
             }
         }
         try {
-            resaults = executor.invokeAll(tasks);
+            results = executor.invokeAll(tasks);
         } catch (InterruptedException e) {
             System.err.println(EXCEPTION_INVOKE_ALL);
         }
-        for (Future<LinksHolder> future : resaults) {
+        for (Future<LinksHolder> future : results) {
 
             try {
                 linksHolder = future.get(1L, TimeUnit.SECONDS);
