@@ -15,7 +15,7 @@ public class SearcherLink {
 
     public static List<String> gettLinks(String... strings) {
         List<String> answer = new ArrayList<>();
-        Pattern pattern = Pattern.compile("(href=\"(http:)*/*(\\w+(/|\\.))*(\\w*|%)*\\w*\")");
+        Pattern pattern = Pattern.compile("((?<=href=\")(http:)*/*(\\w+(/|\\.))*(\\w*|%)*\\w*)(?=\")");
 
         for (String s : strings) {
             Matcher mat = pattern.matcher(s);

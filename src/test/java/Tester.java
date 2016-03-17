@@ -16,8 +16,8 @@ public class Tester {
     @Test
     public void searcherLinkTest1(){
         String text="href=\"http://skillbox.io\"sdfdghdfgdfhfdghsdgjdlfkjglkdfjgldfjlgkljdfgkjldfgkllhref=\"http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F\"";
-        String firstAnswer="href=\"http://skillbox.io\"";
-        String secondAnswer="href=\"http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F\"";
+        String firstAnswer="http://skillbox.io";
+        String secondAnswer="http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F";
         List<String> answer= SearcherLink.gettLinks(text);
         assertEquals(2,answer.size());
         assertEquals(true,firstAnswer.equals(answer.get(0)));
@@ -67,9 +67,9 @@ public class Tester {
     public void searcherLinkTest3(){
         String text="<a href=\"/vanya/gladush.com\" and some one and what  to configure the behavior when a symbolic link is encountered. href=\"/vanya/znaet/chto.reshaet%300%324\"";
         text+="\n\n\ntext and more text \t<bt><sdf><ahref=\"/igladush.com\"";
-        String firstAnswer="href=\"/vanya/gladush.com\"";
-        String secondAnswer="href=\"/vanya/znaet/chto.reshaet%300%324\"";
-        String thirdAnswer="href=\"/igladush.com\"";
+        String firstAnswer="/vanya/gladush.com";
+        String secondAnswer="/vanya/znaet/chto.reshaet%300%324";
+        String thirdAnswer="/igladush.com";
         List<String> answer= SearcherLink.gettLinks(text);
         assertEquals(3,answer.size());
 
@@ -82,15 +82,11 @@ public class Tester {
     public void searcherLincTest4() {
 
         String text = "<a href=\"http://www.quizful.net/test/java_se_basic\">some text</>";
-        String firstAnswer = "href=\"http://www.quizful.net/test/java_se_basic\"";
+        String firstAnswer = "http://www.quizful.net/test/java_se_basic";
         List<String> answer=SearcherLink.gettLinks(text);
         assertEquals(1,answer.size());
         assertEquals(true,firstAnswer.equals(answer.get(0)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void incorrectDownloadsCreateTest1(){
-       DownloaderWebPage dwn= new DownloaderWebPage("sdfsdfsdfsdfsd",true,new LinksHolder());
-        dwn.getWebPage();
-    }
+
 }
