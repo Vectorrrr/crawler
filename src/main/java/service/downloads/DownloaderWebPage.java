@@ -1,6 +1,10 @@
 package service.downloads;
 
+import com.sun.istack.internal.Nullable;
+import service.PropertiesLoader;
 import service.linksHolder.LinksHolder;
+import service.save.StorageInFile;
+import service.save.Storage;
 import service.searcherLinks.SearcherLink;
 
 import java.io.*;
@@ -20,28 +24,30 @@ import java.util.concurrent.*;
  * @since 16.03.16.
  */
 public class DownloaderWebPage implements Callable<Void> {
-    private static final String EXCEPTION_URL_NAME = "You input incorrect url";
-    private static final String EXCEPTION_DOWNLOAD_WEB_PAGE = "When I try download  web-page  I have exception";
-    private static final String EXCEPTION_CREATE = "When I try created file, I have exception!";
-    private static final String EXCEPTION_GET_FUTURE = "I could not save this page correctly";
+    private static final String EXCEPTION_DOWNLOAD_WEB_PAGE = "Don't correct download web page from link ";
     private static final String EXCEPTION_WRITE_ADDITIONAL_LINK = "When I saved the additional links error occurred";
-    private static final String EXCEPTION_INVOKE_ALL = "When I try search additional page I have exception";
     private static final String PATH_TO_DEFAULT_DIR = "./Downloaded Sites/";
     private static final byte[] SEPARATOR = "\n".getBytes();
+
+
+
+    private static ExecutorService executor;
+
 
     /**
      * verifies the existence of the folder to store the default
      * if it does not create it
      */
+    //todo may be throw new unchecked exception and stop program because if we don't create directory we can't save answer
+    //todo or we must not create a folder and simply accept the way and let the folder created by the user
     static {
         File defaultDirectory = new File(PATH_TO_DEFAULT_DIR);
         if (!defaultDirectory.exists()) {
             defaultDirectory.mkdirs();
         }
+        executor=Executors.newFixedThreadPool(PropertiesLoader.getCountThread());
     }
 
-
-    private static ExecutorService executor = null;
 
     /**
      * if it is the main, the all link, that finds on this page
@@ -49,25 +55,30 @@ public class DownloaderWebPage implements Callable<Void> {
      */
     private URL url;
     private LinksHolder linksHolder;
-    private int numberLink = 0;
+    private int linkId = 0;
+    private URL rootURL=null;
+    private String pathToDefaultDirectory;
 
-    public DownloaderWebPage(String url, int countTread) {
-        executor = Executors.newFixedThreadPool(countTread);
-        this.linksHolder = new LinksHolder();
-        try {
-            this.url = new URL(url);
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(EXCEPTION_URL_NAME);
-        }
+    /**
+     * Initializes dir for save web page;
+     * */
+    public DownloaderWebPage(URL url) {
+        this.rootURL=url;
+        this.url = url;
+        linksHolder=new LinksHolder();
+        File f=new File(PATH_TO_DEFAULT_DIR+url.getFile());
+        f.mkdirs();
+        pathToDefaultDirectory =f.getAbsolutePath()+"/";
+
     }
 
-    public DownloaderWebPage(String url, int numberLink, LinksHolder linksHolder) {
-        this(url, 10);
-        this.linksHolder = linksHolder;
-        this.numberLink = numberLink;
-        System.out.println("Download the link number " + numberLink);
+    public DownloaderWebPage(URL url, int numberLink, LinksHolder linksHolder,String pathToDefualtDirrectory) {
+        this.url=url;
+        this.linkId = numberLink;
+        this.linksHolder=linksHolder;
+        this.pathToDefaultDirectory =pathToDefualtDirrectory;
+        System.out.println("Download the link number " + numberLink+"URL "+url);
     }
-
 
     /**
      * each line of the method checks for links
@@ -76,31 +87,27 @@ public class DownloaderWebPage implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         String line;
-        File answerFile = createAnswerFile(PATH_TO_DEFAULT_DIR + "Page from link number" + numberLink + ".txt");
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"));
-             FileOutputStream fileOutputStream = new FileOutputStream(answerFile)) {
-
+             Storage<?> saver=createSaver()) {
             while ((line = reader.readLine()) != null) {
-                fileOutputStream.write(line.getBytes());//save line in file
-                fileOutputStream.write(SEPARATOR);      //move on next line
-
+                saver.write(line);
                 List<String> links = SearcherLink.getLinks(line);
-
-                if (numberLink == 0) {
-                    linksHolder.addNewLinks(links);
+                if (linkId == 0) {
+                    linksHolder.addLinkForSearch(links);
                 } else {
-                    linksHolder.setAdditionalLinks(links);
+                    linksHolder.addMetaLinks(links);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println(EXCEPTION_DOWNLOAD_WEB_PAGE);
+            System.err.println(EXCEPTION_DOWNLOAD_WEB_PAGE+url.toString());
         }
-        //if is root page, download additional pages
-        if (numberLink == 0) {
+
+        //if is root page, download child pages
+        if (linkId == 0) {
             asyncProcessChildPages();
-            saveAdditionalLinks();
+            saveChildLinks();
         }
         return null;
     }
@@ -126,10 +133,10 @@ public class DownloaderWebPage implements Callable<Void> {
     /**
      * Method save additional link
      */
-    private void saveAdditionalLinks() {
-        if (numberLink == 0) {
-            try (FileOutputStream fileWriter = new FileOutputStream(PATH_TO_DEFAULT_DIR + "additionalLink.txt")) {
-                for (String s : linksHolder.getAllAdditionalLinks()) {
+    private void saveChildLinks() {
+        if (linkId == 0) {
+            try (FileOutputStream fileWriter = new FileOutputStream(pathToDefaultDirectory + "additionalLink.txt")) {
+                for (String s : linksHolder.getMetaLinks()) {
                     fileWriter.write(s.getBytes());
                     fileWriter.write(SEPARATOR);
                 }
@@ -140,7 +147,6 @@ public class DownloaderWebPage implements Callable<Void> {
     }
 
     private void asyncProcessChildPages() {
-
         try {
             for (Future<Void> future : executor.invokeAll(getTasks())) {
                 future.get(1L, TimeUnit.SECONDS);
@@ -153,32 +159,37 @@ public class DownloaderWebPage implements Callable<Void> {
     private List<DownloaderWebPage> getTasks() {
         List<DownloaderWebPage> tasks = new ArrayList<>();
         int numb = 0;
+        URL tempURL;
         while (linksHolder.hasNext()) {
-            try {
-                tasks.add(downloaderForNextLink(++numb));
-            }catch(IllegalArgumentException e){
-                System.out.println("When I create new downloader "+e.getMessage());
-            }
+            String link = linksHolder.nextLink();
+            if ((tempURL =createURL(link))!=null)
+                tasks.add(downloaderForNextLink(tempURL, ++numb));
         }
         return tasks;
     }
 
-    private DownloaderWebPage downloaderForNextLink(int numberLink) {
-        return new DownloaderWebPage(linksHolder.nextLink(), numberLink, linksHolder);
+    /**
+     * if the URL has been created successfully,
+     * it returns new URL otherwise null
+     * */
+    @Nullable
+    private URL createURL(String link) {
+        try {
+            if (link.startsWith("/")) {
+                return new URL(rootURL, link);
+            }
+            return new URL(link);
+        }catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    /**
-     * method checks the existence of the file and in the absence creates it
-     */
-    private File createAnswerFile(String path) {
-        File f = new File(path);
-        if (!f.exists()) {
-            try {
-                f.createNewFile();
-            } catch (IOException e) {
-                throw new IllegalArgumentException(EXCEPTION_CREATE);
-            }
-        }
-        return f;
+    private DownloaderWebPage downloaderForNextLink(URL url,int numberLink) {
+        return new DownloaderWebPage(url, numberLink, linksHolder, pathToDefaultDirectory);
+    }
+
+    private Storage<?> createSaver() throws IOException {
+            return new StorageInFile(pathToDefaultDirectory +"File from link number"+linkId);
     }
 }

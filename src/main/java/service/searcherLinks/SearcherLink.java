@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class SearcherLink {
         String s="\\";
 
-    private static final String regex = "((?<=href=\")(((http[s]?://)|(/)).*?)(?=(\")|(#)))";
+    private static final String regex = "((?<=href=\")(((http[s]?://)|(/)).*?)(?=(\")|(#)|(&)))";
     private static final Pattern LINKS_PATTERN = Pattern.compile(regex);
 
 

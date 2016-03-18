@@ -1,4 +1,8 @@
 import service.downloads.DownloaderWebPage;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Scanner;
 
 /**
@@ -12,13 +16,18 @@ public class Main {
         System.out.println("Input url site");
         String siteName = sc.nextLine();
         try {
-            new DownloaderWebPage(siteName, 100).call();
+            URL url = new URL(siteName);
+            new DownloaderWebPage(url).call();
+
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("When I try download page I have exception");
+            System.err.println("You input incorrect site");
+            return;
+        } finally {
+            DownloaderWebPage.stop();
+            sc.close();
         }
-        DownloaderWebPage.stop();
-        sc.close();
 
     }
+
 }
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://www.example.com/students"
+        xmlns:tns="http://www.example.com/students"
+        elementFormDefault="qualified">
+
+    <element name="crawler"
+             type="tns:Crawler"
+    />
+
+    <complexType name="Crawler">
+                <sequence>
+                    <element name="storage" type="tns:Storage"/>
+                    <element name="urlGetter" type="tns:UrlGetter"/>
+                </sequence>
+    </complexType>
+    <simpleType name="Storage">
+        <restriction>
+            <enumeration value="InFile"></enumeration>
+            <enumeration value="InDataBase"></enumeration>
+        </restriction>
+    </simpleType>
+    <simpleType name="UrlGetter">
+        <restriction>
+            <enumeration value="Console"></enumeration>
+        </restriction>
+    </simpleType>
+</schema>
+

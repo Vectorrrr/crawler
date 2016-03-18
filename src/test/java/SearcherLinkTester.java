@@ -3,6 +3,7 @@ import org.junit.Test;
 import service.searcherLinks.SearcherLink;
 
 import java.util.List;
+import java.util.ServiceConfigurationError;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -10,7 +11,7 @@ import static junit.framework.TestCase.assertEquals;
  * @author Gladush Ivan
  * @since 16.03.16.
  */
-public class Tester {
+public class SearcherLinkTester {
 
     @Test
     public void searcherLinkTest1() {
@@ -81,7 +82,7 @@ public class Tester {
     }
 
     @Test
-    public void searcherLincTest4() {
+    public void searcherLinkTest4() {
 
         String text = "<a href=\"http://www.quizful.net/test/java_se_basic\">some text</>";
         String firstAnswer = "http://www.quizful.net/test/java_se_basic";
@@ -91,8 +92,9 @@ public class Tester {
         assertEquals(firstAnswer,answer.get(0));
     }
 
+
     @Test
-    public void searchLincWithoutAnchorLinkTest1(){
+    public void searchLinkWithoutAnchorLinkTest1(){
         String text=" URL, возможно, добавил к этому \"фрагмент\", также " +
                 "известный как \"касательно\" или \"ссылка\". Фрагмент обозначается резким символом знака" +
                 " \"#\" сопровождаемый большим количеством символов. Например,\n" +
@@ -103,8 +105,9 @@ public class Tester {
         assertEquals(true,firstAnswer.equals(answer.get(0)));
 
     }
+
     @Test
-    public void searchLincWithoutAnchorLinkTest2(){
+    public void searchLinkWithoutAnchorLinkTest2(){
         String text="URL является акронимом для Универсального Локатора Ресурса." +
                 " Это - ссылка (адрес) к ресурсу в Интернете. Вы обеспечивае"+
                 "href=\"http://spec-zone.ru/RU/Java/Tutorials#networking#urls#index.html\""+
@@ -117,4 +120,26 @@ public class Tester {
         assertEquals(firstAnswer,answer.get(0));
         assertEquals(secondAnswer,answer.get(1));
     }
+
+    @Test
+    public void searchLinkWithoutParameter1(){
+        String text="sdfghsdfk j sdfjk ghsd; e4 ish;dfjgh;sjdf h;eir 'sdfg 'eirghdfkjgh dfgh;sdfjgh;sdk j href=\"https://en.wikipedia.org/w/index.php?title=Freenom&amp;action=edit&amp;redlink=1\"jsdfh;gkjsdfh;gkjhsd;fkjb dfghsdjkf sd;fg" +
+                "sdfgds;f ksdfh sdf'sd f' sdfgh sd;kfgh ksdf;sdfg ;se rdgh";
+        String firstAnswer="https://en.wikipedia.org/w/index.php?title=Freenom";
+        List<String> answer=SearcherLink.getLinks(text);
+        assertEquals(1,answer.size());
+        assertEquals(firstAnswer,answer.get(0));
+    }
+    @Test
+    public void searchLinkWithoutParameter2(){
+        String text=" href=\"/w/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=styles&amp;skin=vector\"";
+        String firstAnswer="/w/load.php?debug=false";
+        List<String> answer= SearcherLink.getLinks(text);
+        assertEquals(1,answer.size());
+        assertEquals(firstAnswer,answer.get(0));
+
+    }
+
+
+
 }

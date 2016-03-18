@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class LinksHolder {
     private static final String EXCEPTION_EMPTY_LINKS_LIST = "You want link but I don't hve link";
     private ConcurrentLinkedDeque<String> linksForSearch = new ConcurrentLinkedDeque<>();
-    private Set<String> additionalLinks = new HashSet<>();
+    private Set<String> metaLinks = new HashSet<>();
 
     public String nextLink() {
         if (linksForSearch.size() == 0) {
@@ -24,19 +24,19 @@ public class LinksHolder {
         return linksForSearch.pop();
     }
 
-    public void addNewLinks(List<String> links) {
+    public void addLinkForSearch(List<String> links) {
         links.forEach(s -> linksForSearch.add(s));
     }
 
 
-    public void setAdditionalLinks(List<String> list) {
-        list.forEach(s -> additionalLinks.add(s));
+    public void addMetaLinks(List<String> list) {
+        list.forEach(s -> metaLinks.add(s));
     }
 
-    public String[] getAllAdditionalLinks() {
-        String[] allList = new String[additionalLinks.size()];
+    public String[] getMetaLinks() {
+        String[] allList = new String[metaLinks.size()];
         int it = 0;
-        for (String s : additionalLinks) {
+        for (String s : metaLinks) {
             allList[it++] = s;
         }
         return allList;
