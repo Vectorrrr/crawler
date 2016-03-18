@@ -17,8 +17,6 @@ public class Main {
             e.printStackTrace();
             System.err.println("When I try download page I have exception");
         }
-
-
         DownloaderWebPage.stop();
         sc.close();
 

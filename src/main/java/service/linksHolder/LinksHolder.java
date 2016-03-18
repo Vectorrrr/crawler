@@ -1,11 +1,14 @@
 package service.linksHolder;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Class allow hold all that we can find from this page, and page
  * which we can jump from started page
+ *
  * @author Gladush Ivan
  * @since 16.03.16.
  */
@@ -14,7 +17,7 @@ public class LinksHolder {
     private ConcurrentLinkedDeque<String> linksForSearch = new ConcurrentLinkedDeque<>();
     private Set<String> additionalLinks = new HashSet<>();
 
-    public String getNextLink() {
+    public String nextLink() {
         if (linksForSearch.size() == 0) {
             throw new IllegalStateException(EXCEPTION_EMPTY_LINKS_LIST);
         }
@@ -30,16 +33,15 @@ public class LinksHolder {
         list.forEach(s -> additionalLinks.add(s));
     }
 
-    public String[] getAllAdditionalLinks(){
-        String[] allList=new String[additionalLinks.size()];
-        int it=0;
-        for(String s:additionalLinks){
-            allList[it++]=s;
+    public String[] getAllAdditionalLinks() {
+        String[] allList = new String[additionalLinks.size()];
+        int it = 0;
+        for (String s : additionalLinks) {
+            allList[it++] = s;
         }
         return allList;
     }
 
-    public int countProcessingLink() {
-        return this.linksForSearch.size();
+    public boolean hasNext() {return !this.linksForSearch.isEmpty();
     }
 }

@@ -8,17 +8,22 @@ import java.util.regex.Pattern;
 /**
  * Class create for search link in the text
  * by regular expression
+ *
  * @author Gladush Ivan
  * @since 16.03.16.
  */
 public class SearcherLink {
+        String s="\\";
+
+    private static final String regex = "((?<=href=\")(((http[s]?://)|(/)).*?)(?=(\")|(#)))";
+    private static final Pattern LINKS_PATTERN = Pattern.compile(regex);
+
 
     public static List<String> getLinks(String... strings) {
         List<String> answer = new ArrayList<>();
-        Pattern pattern = Pattern.compile("((?<=href=\")(http:)*/*(\\w+(/|\\.))*(\\w*|%)*\\w*)(?=\")");
 
         for (String s : strings) {
-            Matcher mat = pattern.matcher(s);
+            Matcher mat = LINKS_PATTERN.matcher(s);
             while (mat.find()) {
                 answer.add(mat.group(1));
             }

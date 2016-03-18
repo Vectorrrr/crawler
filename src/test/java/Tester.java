@@ -1,3 +1,4 @@
+import junit.framework.Assert;
 import org.junit.Test;
 import service.searcherLinks.SearcherLink;
 
@@ -12,19 +13,20 @@ import static junit.framework.TestCase.assertEquals;
 public class Tester {
 
     @Test
-    public void searcherLinkTest1(){
-        String text="href=\"http://skillbox.io\"sdfdghdfgdfhfdghsdgjdlfkjglkdfjgldfjlgkljdfgkjldfgkllhref=\"http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F\"";
-        String firstAnswer="http://skillbox.io";
-        String secondAnswer="http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F";
-        List<String> answer= SearcherLink.getLinks(text);
-        assertEquals(2,answer.size());
-        assertEquals(true,firstAnswer.equals(answer.get(0)));
-        assertEquals(true,secondAnswer.equals(answer.get(1)));
+    public void searcherLinkTest1() {
+        String text = "href=\"http://skillbox.io\" sdfdghdfgdfhfdghsdgjdlfkjglkdfjgldfjlgkljdfgkjldfgkllhref=\"http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F\"";
+        String firstAnswer = "http://skillbox.io";
+        String secondAnswer = "http://ru.wikipedia.org/wiki/%D0%A0%D0%B5%D0%B3%D1%83%D0%BB%D1%8F%D1%80%D0%BD%D1%8B%D0%B5_%D0%B2%D1%8B%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F";
+        List<String> answer = SearcherLink.getLinks(text);
+        answer.forEach(s -> System.out.println(s));
+        assertEquals(2, answer.size());
+        assertEquals( firstAnswer,answer.get(0));
+        assertEquals(secondAnswer,answer.get(1));
     }
 
     @Test
-    public void searcherLinkTest2(){
-        String text="This lesson covers the Java platform classes used for basic I/O. It first focuses on I/O Streams, a powerful concept that greatly simplifies I/O operations. The lesson also looks at serialization, which lets a program write whole objects out to streams and read them back again. Then the lesson looks at file I/O and file system operations, including random access files.\n" +
+    public void searcherLinkTest2() {
+        String text = "This lesson covers the Java platform classes used for basic I/O. It first focuses on I/O Streams, a powerful concept that greatly simplifies I/O operations. The lesson also looks at serialization, which lets a program write whole objects out to streams and read them back again. Then the lesson looks at file I/O and file system operations, including random access files.\n" +
                 "\n" +
                 "Most of the classes covered in the I/O Streams section are in the java.io package. Most of the classes covered in the File I/O section are in the java.nio.file package.\n" +
                 "I/O Streams\n" +
@@ -57,34 +59,62 @@ public class Tester {
                 "    Watching a Directory for Changes shows how to use the watch service to detect files that are added, removed or updated in one or more directories.\n" +
                 "    Other Useful Methods covers important API that didn't fit elsewhere in the lesson.\n" +
                 "    Legacy File I/O Code shows how to leverage Path functionality if you have older code using the java.io.File class. A table mapping java.io.File API to java.nio.file API is provided.\n";
-      List<String> answer= SearcherLink.getLinks(text);
-        assertEquals(0,answer.size());
+        List<String> answer = SearcherLink.getLinks(text);
+        assertEquals(0, answer.size());
     }
 
     @Test
-    public void searcherLinkTest3(){
-        String text="<a href=\"/vanya/gladush.com\" and some one and what  to configure the behavior when a symbolic link is encountered. href=\"/vanya/znaet/chto.reshaet%300%324\"";
-        text+="\n\n\ntext and more text \t<bt><sdf><ahref=\"/igladush.com\"";
-        String firstAnswer="/vanya/gladush.com";
-        String secondAnswer="/vanya/znaet/chto.reshaet%300%324";
-        String thirdAnswer="/igladush.com";
-        List<String> answer= SearcherLink.getLinks(text);
-        assertEquals(3,answer.size());
+    public void searcherLinkTest3() {
+        String text = "<a href=\"/vanya/gladush.com\" and some one and what  to configure the behavior when a symbolic link is encountered. href=\"/vanya/znaet/chto.reshaet%300%324\"";
+        text += "\n\n\ntext and more text \t<bt><sdf><ahref=\"/igladush.com\"";
+        String firstAnswer = "/vanya/gladush.com";
+        String secondAnswer = "/vanya/znaet/chto.reshaet%300%324";
+        String thirdAnswer = "/igladush.com";
+        List<String> answer = SearcherLink.getLinks(text);
+        answer.forEach(s -> System.out.println(s));
+        assertEquals(3, answer.size());
 
-        assertEquals(true,firstAnswer.equals(answer.get(0)));
-        assertEquals(true,secondAnswer.equals(answer.get(1)));
-        assertEquals(true,thirdAnswer.equals(answer.get(2)));
+        assertEquals(firstAnswer, answer.get(0));
+        assertEquals(secondAnswer, answer.get(1));
+        assertEquals(thirdAnswer, answer.get(2));
 
     }
+
     @Test
     public void searcherLincTest4() {
 
         String text = "<a href=\"http://www.quizful.net/test/java_se_basic\">some text</>";
         String firstAnswer = "http://www.quizful.net/test/java_se_basic";
+        List<String> answer = SearcherLink.getLinks(text);
+        answer.forEach(s -> System.out.println(s));
+        assertEquals(1, answer.size());
+        assertEquals(firstAnswer,answer.get(0));
+    }
+
+    @Test
+    public void searchLincWithoutAnchorLinkTest1(){
+        String text=" URL, возможно, добавил к этому \"фрагмент\", также " +
+                "известный как \"касательно\" или \"ссылка\". Фрагмент обозначается резким символом знака" +
+                " \"#\" сопровождаемый большим количеством символов. Например,\n" +
+                "   href=\"http://java.sun.com/index.html#chapter1\n";
+        String firstAnswer="http://java.sun.com/index.html";
         List<String> answer=SearcherLink.getLinks(text);
         assertEquals(1,answer.size());
         assertEquals(true,firstAnswer.equals(answer.get(0)));
+
     }
-
-
+    @Test
+    public void searchLincWithoutAnchorLinkTest2(){
+        String text="URL является акронимом для Универсального Локатора Ресурса." +
+                " Это - ссылка (адрес) к ресурсу в Интернете. Вы обеспечивае"+
+                "href=\"http://spec-zone.ru/RU/Java/Tutorials#networking#urls#index.html\""+
+                " же образом, что Вы обеспечиваете адреса на буквах так, чтобы почтовое отделение могло определить"+
+                "href=\"http://docs.oracle.com/javase/6/docs#api#java%URL.html\"";
+        String firstAnswer="http://spec-zone.ru/RU/Java/Tutorials";
+        String secondAnswer="http://docs.oracle.com/javase/6/docs";
+        List<String> answer=SearcherLink.getLinks(text);
+        assertEquals(2,answer.size());
+        assertEquals(firstAnswer,answer.get(0));
+        assertEquals(secondAnswer,answer.get(1));
+    }
 }

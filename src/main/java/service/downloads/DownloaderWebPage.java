@@ -1,7 +1,7 @@
 package service.downloads;
 
-import service.searcherLinks.SearcherLink;
 import service.linksHolder.LinksHolder;
+import service.searcherLinks.SearcherLink;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -15,10 +15,11 @@ import java.util.concurrent.*;
  * asynchronously
  * EXCEPTION_GET_FUTURE  This  error is caused in the two cases, or page reading
  * was not possible, either reading a page took more than 3 seconds
+ *
  * @author Gladush Ivan
  * @since 16.03.16.
  */
-public class DownloaderWebPage implements Callable<LinksHolder> {
+public class DownloaderWebPage implements Callable<Void> {
     private static final String EXCEPTION_URL_NAME = "You input incorrect url";
     private static final String EXCEPTION_DOWNLOAD_WEB_PAGE = "When I try download  web-page  I have exception";
     private static final String EXCEPTION_CREATE = "When I try created file, I have exception!";
@@ -73,7 +74,7 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
      * each line is stored in the file that contains the original page
      */
     @Override
-    public LinksHolder call() throws Exception {
+    public Void call() throws Exception {
         String line;
         File answerFile = createAnswerFile(PATH_TO_DEFAULT_DIR + "Page from link number" + numberLink + ".txt");
 
@@ -92,31 +93,32 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
                     linksHolder.setAdditionalLinks(links);
                 }
             }
-
-
         } catch (IOException e) {
+            e.printStackTrace();
             System.err.println(EXCEPTION_DOWNLOAD_WEB_PAGE);
         }
         //if is root page, download additional pages
         if (numberLink == 0) {
-            downloadSubsidiariesPages();
+            asyncProcessChildPages();
             saveAdditionalLinks();
         }
-        return linksHolder;
+        return null;
     }
 
     public static void stop() {
         try {
             System.out.println("attempt to shutdown executor");
             executor.shutdown();
-            executor.awaitTermination(5, TimeUnit.SECONDS);
+            executor.awaitTermination(15, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             System.err.println("tasks interrupted");
         } finally {
             if (!executor.isTerminated()) {
                 System.err.println("cancel non-finished tasks");
             }
-            executor.shutdownNow();
+
+           executor.shutdownNow();
+
             System.out.println("shutdown finished");
         }
     }
@@ -137,39 +139,32 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
         }
     }
 
-    private void downloadSubsidiariesPages() {
-        System.out.println("#########COUNT ALL LINKS ##########" + linksHolder.countProcessingLink());
-        List<DownloaderWebPage> tasks = new ArrayList<>();
-        List<Future<LinksHolder>> results = new ArrayList<>();
-        int numb = 0;
-        while (linksHolder.countProcessingLink() > 0) {
-            System.out.println("!!!!!!!!!!!! " + numb);
-            String link = linksHolder.getNextLink();
-            System.out.println("~~~~~~~~~~~      \t" + link);
-            try {
-                DownloaderWebPage dwp = new DownloaderWebPage(link, ++numb, linksHolder);
-                tasks.add(dwp);
-            } catch (IllegalArgumentException e) {
-                System.err.println("I can't download the link " + link);
-            }
-        }
+    private void asyncProcessChildPages() {
+
         try {
-            results = executor.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            System.err.println(EXCEPTION_INVOKE_ALL);
-        }
-        for (Future<LinksHolder> future : results) {
-
-            try {
-                linksHolder = future.get(1L, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                System.err.println(EXCEPTION_GET_FUTURE);
+            for (Future<Void> future : executor.invokeAll(getTasks())) {
+                future.get(1L, TimeUnit.SECONDS);
             }
-
-
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
         }
-        saveAdditionalLinks();
+    }
 
+    private List<DownloaderWebPage> getTasks() {
+        List<DownloaderWebPage> tasks = new ArrayList<>();
+        int numb = 0;
+        while (linksHolder.hasNext()) {
+            try {
+                tasks.add(downloaderForNextLink(++numb));
+            }catch(IllegalArgumentException e){
+                System.out.println("When I create new downloader "+e.getMessage());
+            }
+        }
+        return tasks;
+    }
+
+    private DownloaderWebPage downloaderForNextLink(int numberLink) {
+        return new DownloaderWebPage(linksHolder.nextLink(), numberLink, linksHolder);
     }
 
     /**
