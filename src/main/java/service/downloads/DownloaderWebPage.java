@@ -1,7 +1,10 @@
 package service.downloads;
 
-import service.searcherLinks.SearcherLink;
+import com.sun.istack.internal.Nullable;
+import service.property.loader.SystemSettingsLoader;
 import service.linksHolder.LinksHolder;
+import service.save.Storage;
+import service.searcherLinks.SearcherLink;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -15,32 +18,12 @@ import java.util.concurrent.*;
  * asynchronously
  * EXCEPTION_GET_FUTURE  This  error is caused in the two cases, or page reading
  * was not possible, either reading a page took more than 3 seconds
+ *
  * @author Gladush Ivan
  * @since 16.03.16.
  */
-public class DownloaderWebPage implements Callable<LinksHolder> {
-    private static final String EXCEPTION_URL_NAME = "You input incorrect url";
-    private static final String EXCEPTION_DOWNLOAD_WEB_PAGE = "When I try download  web-page  I have exception";
-    private static final String EXCEPTION_CREATE = "When I try created file, I have exception!";
-    private static final String EXCEPTION_GET_FUTURE = "I could not save this page correctly";
-    private static final String EXCEPTION_WRITE_ADDITIONAL_LINK = "When I saved the additional links error occurred";
-    private static final String EXCEPTION_INVOKE_ALL = "When I try search additional page I have exception";
-    private static final String PATH_TO_DEFAULT_DIR = "./Downloaded Sites/";
-    private static final byte[] SEPARATOR = "\n".getBytes();
-
-    /**
-     * verifies the existence of the folder to store the default
-     * if it does not create it
-     */
-    static {
-        File defaultDirectory = new File(PATH_TO_DEFAULT_DIR);
-        if (!defaultDirectory.exists()) {
-            defaultDirectory.mkdirs();
-        }
-    }
-
-
-    private static ExecutorService executor = null;
+public class DownloaderWebPage implements Callable<Void> {
+    private static final ExecutorService executor = Executors.newFixedThreadPool(SystemSettingsLoader.getCountThread());
 
     /**
      * if it is the main, the all link, that finds on this page
@@ -48,75 +31,76 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
      */
     private URL url;
     private LinksHolder linksHolder;
-    private int numberLink = 0;
+    private int linkId = 0;
+    private URL rootURL = null;
+    private String pathToDefaultDirectory;
+    private Storage storage;
+    private String pageId;
 
-    public DownloaderWebPage(String url, int countTread) {
-        executor = Executors.newFixedThreadPool(countTread);
-        this.linksHolder = new LinksHolder();
-        try {
-            this.url = new URL(url);
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(EXCEPTION_URL_NAME);
-        }
+    /**
+     * Initializes dir for save web page;
+     */
+    public DownloaderWebPage(URL url, Storage storage) {
+        this.rootURL = url;
+        this.url = url;
+        this.storage = storage;
+        linksHolder = new LinksHolder();
+        pathToDefaultDirectory = storage.createDir(url.getFile());
+        pageId = storage.writePage(url.toString(), pathToDefaultDirectory + "File from link number" + linkId);
     }
 
-    public DownloaderWebPage(String url, int numberLink, LinksHolder linksHolder) {
-        this(url, 10);
+    public DownloaderWebPage(URL url, int numberLink, LinksHolder linksHolder, String pathToDefaultDirectory, Storage storage) {
+        this.url = url;
+        this.linkId = numberLink;
         this.linksHolder = linksHolder;
-        this.numberLink = numberLink;
-        System.out.println("Download the link number " + numberLink);
+        this.pathToDefaultDirectory = pathToDefaultDirectory;
+        this.storage = storage;
+        pageId = storage.writePage(url.toString(), this.pathToDefaultDirectory + "File from link number" + linkId);
+        System.out.println("Download the link number " + numberLink + "URL " + url);
     }
-
 
     /**
      * each line of the method checks for links
      * each line is stored in the file that contains the original page
      */
     @Override
-    public LinksHolder call() throws Exception {
+    public Void call() throws Exception {
         String line;
-        File answerFile = createAnswerFile(PATH_TO_DEFAULT_DIR + "Page from link number" + numberLink + ".txt");
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"));
-             FileOutputStream fileOutputStream = new FileOutputStream(answerFile)) {
-
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"))) {
             while ((line = reader.readLine()) != null) {
-                fileOutputStream.write(line.getBytes());//save line in file
-                fileOutputStream.write(SEPARATOR);      //move on next line
-
+                storage.writeContent(pageId, line);
                 List<String> links = SearcherLink.getLinks(line);
-
-                if (numberLink == 0) {
-                    linksHolder.addNewLinks(links);
+                if (linkId == 0) {
+                    linksHolder.addLinkForSearch(links);
                 } else {
-                    linksHolder.setAdditionalLinks(links);
+                    linksHolder.addMetaLinks(links);
                 }
             }
-
-
+            if (linkId == 0) {//if is root page, download child pages
+                asyncProcessChildPages();
+                saveChildLinks();
+            }
         } catch (IOException e) {
-            System.err.println(EXCEPTION_DOWNLOAD_WEB_PAGE);
+            e.printStackTrace();
+            throw new IOException(e);
         }
-        //if is root page, download additional pages
-        if (numberLink == 0) {
-            downloadSubsidiariesPages();
-            saveAdditionalLinks();
-        }
-        return linksHolder;
+
+
+        return null;
     }
 
-    public static void stop() {
+    public void stop() {
         try {
             System.out.println("attempt to shutdown executor");
             executor.shutdown();
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+            executor.awaitTermination(1, TimeUnit.SECONDS);
+            storage.close();
+        } catch (InterruptedException | IOException e) {
             System.err.println("tasks interrupted");
         } finally {
             if (!executor.isTerminated()) {
                 System.err.println("cancel non-finished tasks");
             }
-            executor.shutdownNow();
             System.out.println("shutdown finished");
         }
     }
@@ -124,66 +108,48 @@ public class DownloaderWebPage implements Callable<LinksHolder> {
     /**
      * Method save additional link
      */
-    private void saveAdditionalLinks() {
-        if (numberLink == 0) {
-            try (FileOutputStream fileWriter = new FileOutputStream(PATH_TO_DEFAULT_DIR + "additionalLink.txt")) {
-                for (String s : linksHolder.getAllAdditionalLinks()) {
-                    fileWriter.write(s.getBytes());
-                    fileWriter.write(SEPARATOR);
-                }
-            } catch (IOException e) {
-                System.err.println(EXCEPTION_WRITE_ADDITIONAL_LINK);
-            }
+    private void saveChildLinks() {
+        storage.writeLinks(pageId, linksHolder.getMetaLinks());
+    }
+
+    private void asyncProcessChildPages()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        for (Future<Void> future : executor.invokeAll(getTasks(), 10, TimeUnit.SECONDS)) {
+            future.get(1, TimeUnit.MILLISECONDS);
         }
     }
 
-    private void downloadSubsidiariesPages() {
-        System.out.println("#########COUNT ALL LINKS ##########" + linksHolder.countProcessingLink());
+    private List<DownloaderWebPage> getTasks() {
         List<DownloaderWebPage> tasks = new ArrayList<>();
-        List<Future<LinksHolder>> results = new ArrayList<>();
         int numb = 0;
-        while (linksHolder.countProcessingLink() > 0) {
-            System.out.println("!!!!!!!!!!!! " + numb);
-            String link = linksHolder.getNextLink();
-            System.out.println("~~~~~~~~~~~      \t" + link);
-            try {
-                DownloaderWebPage dwp = new DownloaderWebPage(link, ++numb, linksHolder);
-                tasks.add(dwp);
-            } catch (IllegalArgumentException e) {
-                System.err.println("I can't download the link " + link);
-            }
+        URL tempURL;
+        while (linksHolder.hasNext()) {
+            String link = linksHolder.nextLink();
+            if ((tempURL = createURL(link)) != null)
+                tasks.add(downloaderForNextLink(tempURL, ++numb));
         }
-        try {
-            results = executor.invokeAll(tasks);
-        } catch (InterruptedException e) {
-            System.err.println(EXCEPTION_INVOKE_ALL);
-        }
-        for (Future<LinksHolder> future : results) {
-
-            try {
-                linksHolder = future.get(1L, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                System.err.println(EXCEPTION_GET_FUTURE);
-            }
-
-
-        }
-        saveAdditionalLinks();
-
+        return tasks;
     }
 
     /**
-     * method checks the existence of the file and in the absence creates it
+     * if the URL has been created successfully,
+     * it returns new URL otherwise null
      */
-    private File createAnswerFile(String path) {
-        File f = new File(path);
-        if (!f.exists()) {
-            try {
-                f.createNewFile();
-            } catch (IOException e) {
-                throw new IllegalArgumentException(EXCEPTION_CREATE);
+    @Nullable
+    private URL createURL(String link) {
+        try {
+            if (link.startsWith("/")) {
+                return new URL(rootURL, link);
             }
+            return new URL(link);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
         }
-        return f;
     }
+
+    private DownloaderWebPage downloaderForNextLink(URL url, int numberLink) {
+        return new DownloaderWebPage(url, numberLink, linksHolder, pathToDefaultDirectory, storage);
+    }
+
 }
