@@ -13,11 +13,8 @@ import java.util.regex.Pattern;
  * @since 16.03.16.
  */
 public class SearcherLink {
-        String s="\\";
-
     private static final String regex = "((?<=href=\")(((http[s]?://)|(/)).*?)(?=(\")|(#)|(&)))";
     private static final Pattern LINKS_PATTERN = Pattern.compile(regex);
-
 
     public static List<String> getLinks(String... strings) {
         List<String> answer = new ArrayList<>();

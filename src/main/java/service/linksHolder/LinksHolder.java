@@ -28,7 +28,6 @@ public class LinksHolder {
         links.forEach(s -> linksForSearch.add(s));
     }
 
-
     public void addMetaLinks(List<String> list) {
         list.forEach(s -> metaLinks.add(s));
     }
@@ -42,6 +41,7 @@ public class LinksHolder {
         return allList;
     }
 
-    public boolean hasNext() {return !this.linksForSearch.isEmpty();
+    public boolean hasNext() {
+        return !this.linksForSearch.isEmpty();
     }
 }

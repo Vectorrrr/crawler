@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
-        targetNamespace="http://www.example.com/students"
-        xmlns:tns="http://www.example.com/students"
-        elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 
-    <element name="crawler"
-             type="tns:Crawler"
+
+    <xs:element name="configuration"
+             type="Crawler"
+
     />
+    <xs:complexType name="Crawler">
+                <xs:sequence>
+                    <xs:element name="storage" type="Storage"/>
+                    <xs:element name="urlGetter" type="UrlGetter"/>
+                </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="Storage">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="StorageInFile"/>
+            <xs:enumeration value="StorageInDb"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="UrlGetter">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ConsoleProducer"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-    <complexType name="Crawler">
-                <sequence>
-                    <element name="storage" type="tns:Storage"/>
-                    <element name="urlGetter" type="tns:UrlGetter"/>
-                </sequence>
-    </complexType>
-    <simpleType name="Storage">
-        <restriction>
-            <enumeration value="InFile"></enumeration>
-            <enumeration value="InDataBase"></enumeration>
-        </restriction>
-    </simpleType>
-    <simpleType name="UrlGetter">
-        <restriction>
-            <enumeration value="Console"></enumeration>
-        </restriction>
-    </simpleType>
-</schema>
+</xs:schema>
 
