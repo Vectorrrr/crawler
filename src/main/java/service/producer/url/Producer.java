@@ -1,4 +1,4 @@
-package service.producer.URL;
+package service.producer.url;
 
 import java.io.Closeable;
 

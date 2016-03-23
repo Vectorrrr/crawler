@@ -1,9 +1,9 @@
-package service.save;
+package service.storage;
 
 import java.io.*;
 
 /**
- * Class allow save result in file
+ * Class allows to save result in file
  * @author Gladush Ivan
  * @since 18.03.16.
  */
@@ -74,19 +74,9 @@ public class StorageInFile implements Storage {
         fw.write(SEPARATOR);
     }
 
-    /**
-     * Method creates a directory which will store all the pages received from this link
-     */
-    @Override
-    public String createDir(String path) {
-        File f = new File(PATH_TO_DEFAULT_DIR + path);
-        f.mkdirs();
-        return f.getAbsolutePath() + "/";
-
-    }
 
     private File getFile(String pageName) {
-        File f = new File(pageName);
+        File f = new File(PATH_TO_DEFAULT_DIR + pageName);
         try {
             f.createNewFile();
         } catch (IOException e) {

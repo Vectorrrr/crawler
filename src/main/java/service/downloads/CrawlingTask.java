@@ -1,10 +1,10 @@
 package service.downloads;
 
 import com.sun.istack.internal.Nullable;
-import service.property.loader.SystemSettingsLoader;
-import service.linksHolder.LinksHolder;
-import service.save.Storage;
-import service.searcherLinks.SearcherLink;
+import service.property.loader.PropertyLoader;
+import service.links.holder.LinksHolder;
+import service.storage.Storage;
+import service.link.processor.LinkProcessor;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -16,14 +16,12 @@ import java.util.concurrent.*;
 /**
  * Class allow download page from web and also that class can do it
  * asynchronously
- * EXCEPTION_GET_FUTURE  This  error is caused in the two cases, or page reading
- * was not possible, either reading a page took more than 3 seconds
  *
  * @author Gladush Ivan
  * @since 16.03.16.
  */
-public class DownloaderWebPage implements Callable<Void> {
-    private static final ExecutorService executor = Executors.newFixedThreadPool(SystemSettingsLoader.getCountThread());
+public class CrawlingTask implements Callable<Void> {
+    private static final ExecutorService executor = Executors.newFixedThreadPool(Integer.valueOf(PropertyLoader.getProperty("amount.thread.in.pull")))  ;
 
     /**
      * if it is the main, the all link, that finds on this page
@@ -31,7 +29,7 @@ public class DownloaderWebPage implements Callable<Void> {
      */
     private URL url;
     private LinksHolder linksHolder;
-    private int linkId = 0;
+    private int linkId ;
     private URL rootURL = null;
     private String pathToDefaultDirectory;
     private Storage storage;
@@ -40,22 +38,17 @@ public class DownloaderWebPage implements Callable<Void> {
     /**
      * Initializes dir for save web page;
      */
-    public DownloaderWebPage(URL url, Storage storage) {
-        this.rootURL = url;
-        this.url = url;
-        this.storage = storage;
-        linksHolder = new LinksHolder();
-        pathToDefaultDirectory = storage.createDir(url.getFile());
-        pageId = storage.writePage(url.toString(), pathToDefaultDirectory + "File from link number" + linkId);
+    public CrawlingTask(URL url, Storage storage) {
+        this(url,storage,0,new LinksHolder(),url.getFile());
     }
 
-    public DownloaderWebPage(URL url, int numberLink, LinksHolder linksHolder, String pathToDefaultDirectory, Storage storage) {
+    public CrawlingTask(URL url, Storage storage, int numberLink, LinksHolder linksHolder, String pathToDefaultDirectory) {
         this.url = url;
         this.linkId = numberLink;
         this.linksHolder = linksHolder;
         this.pathToDefaultDirectory = pathToDefaultDirectory;
         this.storage = storage;
-        pageId = storage.writePage(url.toString(), this.pathToDefaultDirectory + "File from link number" + linkId);
+        this.pageId = storage.writePage(url.toString(), pathToDefaultDirectory.replaceAll("/","") + "File from link number" + linkId);
         System.out.println("Download the link number " + numberLink + "URL " + url);
     }
 
@@ -69,7 +62,7 @@ public class DownloaderWebPage implements Callable<Void> {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"))) {
             while ((line = reader.readLine()) != null) {
                 storage.writeContent(pageId, line);
-                List<String> links = SearcherLink.getLinks(line);
+                List<String> links = LinkProcessor.getLinksForText(line);
                 if (linkId == 0) {
                     linksHolder.addLinkForSearch(links);
                 } else {
@@ -78,11 +71,9 @@ public class DownloaderWebPage implements Callable<Void> {
             }
             if (linkId == 0) {//if is root page, download child pages
                 asyncProcessChildPages();
-                saveChildLinks();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IOException(e);
+        } finally {
+                saveChildLinks();
         }
 
 
@@ -109,7 +100,9 @@ public class DownloaderWebPage implements Callable<Void> {
      * Method save additional link
      */
     private void saveChildLinks() {
-        storage.writeLinks(pageId, linksHolder.getMetaLinks());
+        if (linkId == 0) {
+            storage.writeLinks(pageId, linksHolder.getMetaLinks());
+        }
     }
 
     private void asyncProcessChildPages()
@@ -119,14 +112,14 @@ public class DownloaderWebPage implements Callable<Void> {
         }
     }
 
-    private List<DownloaderWebPage> getTasks() {
-        List<DownloaderWebPage> tasks = new ArrayList<>();
+    private List<CrawlingTask> getTasks() {
+        List<CrawlingTask> tasks = new ArrayList<>();
         int numb = 0;
         URL tempURL;
         while (linksHolder.hasNext()) {
             String link = linksHolder.nextLink();
             if ((tempURL = createURL(link)) != null)
-                tasks.add(downloaderForNextLink(tempURL, ++numb));
+                tasks.add(crawlingForNextLink(tempURL, ++numb));
         }
         return tasks;
     }
@@ -148,8 +141,8 @@ public class DownloaderWebPage implements Callable<Void> {
         }
     }
 
-    private DownloaderWebPage downloaderForNextLink(URL url, int numberLink) {
-        return new DownloaderWebPage(url, numberLink, linksHolder, pathToDefaultDirectory, storage);
+    private CrawlingTask crawlingForNextLink(URL url, int numberLink) {
+        return new CrawlingTask(url,storage, numberLink, linksHolder, pathToDefaultDirectory);
     }
 
 }

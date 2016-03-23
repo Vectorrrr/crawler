@@ -1,7 +1,7 @@
 import configuration.Configuration;
-import service.property.loader.SystemSettingsLoader;
-import service.downloads.DownloaderWebPage;
-import service.producer.URL.Producer;
+import service.property.loader.PropertyLoader;
+import service.downloads.CrawlingTask;
+import service.producer.url.Producer;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -25,7 +25,7 @@ public class Main {
 
 
     public static void main(String[] args) throws Exception {
-        String fileConfigurationName= SystemSettingsLoader.fileConfigurationName();
+    String fileConfigurationName= PropertyLoader.getProperty("file.configuration.name");
         JAXBContext jc=JAXBContext.newInstance(Configuration.class);
         Configuration configuration;
         String siteName;
@@ -38,16 +38,16 @@ public class Main {
             configuration = (Configuration) u.unmarshal(new File(fileConfigurationName));
             System.out.println(configuration);
             System.out.println(configuration.getNewStorage());
-            Producer p=configuration.getProvider();
+            Producer p=configuration.getProducer();
             siteName=p.getURL();
 
         } catch (JAXBException e) {
            throw new IllegalArgumentException(e);
         }
-        DownloaderWebPage dwp=null;
+        CrawlingTask dwp=null;
         try {
             URL url = new URL(siteName);
-            dwp  =  new DownloaderWebPage(url,configuration.getNewStorage());
+            dwp  =  new CrawlingTask(url,configuration.getNewStorage());
             dwp.call();
         } catch (Exception e) {
 
@@ -65,7 +65,7 @@ public class Main {
     private static boolean isCorrectShem(String fileName) {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
-        String schemaName = SystemSettingsLoader.fileConfigurationScheme();
+        String schemaName = PropertyLoader.getProperty("file.configuration.scheme");
         SchemaFactory factory = SchemaFactory.newInstance(language);
         File schemaLocation = new File(schemaName);
 
