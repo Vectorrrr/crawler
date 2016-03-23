@@ -1,4 +1,4 @@
-package service.searcherLinks;
+package service.link.processor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +12,11 @@ import java.util.regex.Pattern;
  * @author Gladush Ivan
  * @since 16.03.16.
  */
-public class SearcherLink {
+public class LinkProcessor {
     private static final String regex = "((?<=href=\")(((http[s]?://)|(/)).*?)(?=(\")|(#)|(&)))";
     private static final Pattern LINKS_PATTERN = Pattern.compile(regex);
 
-    public static List<String> getLinks(String... strings) {
+    public static List<String> getLinksForText(String... strings) {
         List<String> answer = new ArrayList<>();
 
         for (String s : strings) {

@@ -1,8 +1,8 @@
 package configuration;
 
-import service.producer.URL.Producer;
-import service.property.loader.SystemSettingsLoader;
-import service.save.Storage;
+import service.producer.url.Producer;
+import service.property.loader.PropertyLoader;
+import service.storage.Storage;
 
 import javax.xml.bind.annotation.*;
 
@@ -19,8 +19,8 @@ import javax.xml.bind.annotation.*;
 })
 public class Configuration {
     private static final String EXCEPTION_CLASS_CREATE_EXAMPLE = "I can't create class";
-    private static final String STORAGE_DIRECTORY= SystemSettingsLoader.getStorageDirectory();
-    private static final String PRODUCER_DIRECTORY=SystemSettingsLoader.getProducerDirectory();
+    private static final String STORAGE_DIRECTORY= PropertyLoader.getProperty("storage.directory");
+    private static final String PRODUCER_DIRECTORY= PropertyLoader.getProperty("producer.directory");
     private String storage;
     private String urlGetter;
 
@@ -63,7 +63,7 @@ public class Configuration {
      *  method returns an object through which you
      *  can get the URL of a particular website
      * */
-    public Producer getProvider() {
+    public Producer getProducer() {
         try {
             return (Producer) Class.forName(PRODUCER_DIRECTORY + urlGetter).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {

@@ -1,4 +1,4 @@
-package service.save;
+package service.storage;
 
 import java.io.Closeable;
 
@@ -26,9 +26,4 @@ public interface Storage extends Closeable,AutoCloseable {
       * writes the contents of the page
       */
      void writeContent(String siteURL, String content);
-
-     /**
-      * creates a storage location
-      */
-     String createDir(String path);
 }
