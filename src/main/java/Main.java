@@ -1,4 +1,7 @@
 import configuration.Configuration;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 import service.property.loader.PropertyLoader;
 import service.downloads.CrawlingTask;
 import service.producer.url.Producer;
@@ -7,6 +10,9 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -15,17 +21,24 @@ import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Gladush Ivan
  * @since 16.03.16.
  */
 public class Main {
-
-
-
+    public static String t="B";
+    public static Object o;
     public static void main(String[] args) throws Exception {
-    String fileConfigurationName= PropertyLoader.getProperty("file.configuration.name");
+       System.out.println(new ProducerInstance().getInstance("asd"));
+
+    }
+
+    /**  public static void main(String[] args) throws Exception {
+//    String fileConfigurationName= PropertyLoader.getProperty("file.configuration.name");
+
         JAXBContext jc=JAXBContext.newInstance(Configuration.class);
         Configuration configuration;
         String siteName;
@@ -61,7 +74,7 @@ public class Main {
 
 
 
-    }
+    }*/
     private static boolean isCorrectShem(String fileName) {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 

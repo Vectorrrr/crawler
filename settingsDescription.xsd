@@ -4,7 +4,6 @@
 
     <xs:element name="configuration"
              type="Crawler"
-
     />
     <xs:complexType name="Crawler">
                 <xs:sequence>

@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <storage>StorageInDb</storage>
-    <urlGetter>ConsoleProducer</urlGetter>
+    <bean id="A" class="A">
+        <property name="b" ref="B"></property>
+    </bean>
+    <bean id="B" class="B">
+        <property name="a"  value="10"></property>
+    </bean>
+
+    <bean id="C" class="C">
+        <property name="d" ref="D"></property>
+    </bean>
+    <bean id="D" class="A">
+        <property name="e" ref="E"></property>
+    </bean>
+    <bean id="E" class="e">
+        <property name="a" ref="C"></property>
+    </bean>
+
 </configuration>
