@@ -18,25 +18,20 @@ import java.io.IOException;
  */
 public class Main {
     private static final String EXCEPTION_NOT_CORRECT_XML_SHEM="Your xml doesn't correct";
-
     public static void main(String[] args) {
-
-        if(!isCorrectShem("settings.xml")){
+        if (!isCorrectShem("file.configuration.name")) {
             throw new IllegalArgumentException(EXCEPTION_NOT_CORRECT_XML_SHEM);
         }
-        ClassProducer classProducer=new ClassProducer();
-
-
-        try ( Crawling crawling= (Crawling) classProducer.getInstance("Crawling")){
-            ProducerURL producerURL=(ProducerURL)classProducer.getInstance("urlProducer");
+        ClassProducer classProducer = new ClassProducer();
+        try (Crawling crawling = (Crawling) classProducer.getInstance("Crawling")) {
+            ProducerURL producerURL = (ProducerURL) classProducer.getInstance("urlProducer");
             crawling.setUrl(producerURL.getURL());
             crawling.call();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
+
     private static boolean isCorrectShem(String fileName) {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 

@@ -13,7 +13,7 @@ import java.util.List;
  * @since 23.03.16.
  */
 public class Bean {
-    private static final String EXCEPTION_CREATE_PRIMITIVE_TYPE="I don't support this type";
+    private static final String EXCEPTION_CREATE_PRIMITIVE_TYPE = "I don't support this type";
     private List<String> primitiveNames = new ArrayList<>();
     private List<String> primitiveValues = new ArrayList<>();
     private List<String> compositeNames = new ArrayList<>();
@@ -26,31 +26,27 @@ public class Bean {
         this.classPath = classPath;
     }
 
-    public List<String> getCompositeValues(){
+    public List<String> getCompositeValues() {
         return Collections.unmodifiableList(compositeValues);
     }
 
-   public void addPrimitiveName(String name){
-       primitiveNames.add(name);
-   }
-    public void addCompositeName(String name){
+    public void addPrimitiveName(String name) { primitiveNames.add(name); }
+
+    public void addCompositeName(String name) {
         compositeNames.add(name);
     }
-    public void addCompositeValue(String value){
+
+    public void addCompositeValue(String value) {
         compositeValues.add(value);
     }
-
 
     public String getClassPath() {
         return classPath;
     }
 
-
     public String getName() {
         return name;
     }
-
-
 
     public boolean isPrimaryField(Field f) {
         return primitiveNames.contains(f.getName());
@@ -76,6 +72,6 @@ public class Bean {
     }
 
     public String getCompositeValue(String name) {
-        return  compositeValues.get(compositeNames.indexOf(name));
+        return compositeValues.get(compositeNames.indexOf(name));
     }
 }

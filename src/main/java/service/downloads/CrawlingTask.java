@@ -52,7 +52,9 @@ public class CrawlingTask implements Crawling{
         System.out.println("Download the link number " + numberLink + "URL " + url);
     }
 
-
+    /**
+     * Method set Url and create default directory for save project
+     * */
     @Override
     public void setUrl(URL url){
         this.url=url;

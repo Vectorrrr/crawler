@@ -2,7 +2,7 @@
 <root>
     <configuration>
         <bean id="Crawling" class="service.downloads.CrawlingTask">
-            <property name="storage" ref="storage"></property>
+            <property name="storage" ref="storage"/>
         </bean>
     </configuration>
     <beans>
