@@ -1,18 +1,9 @@
-import configuration.Configuration;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import service.downloads.Crawling;
+import service.producer.ClassProducer;
+import service.producer.url.ProducerURL;
 import service.property.loader.PropertyLoader;
-import service.downloads.CrawlingTask;
-import service.producer.url.Producer;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -20,61 +11,32 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Gladush Ivan
  * @since 16.03.16.
  */
 public class Main {
-    public static String t="B";
-    public static Object o;
-    public static void main(String[] args) throws Exception {
-       System.out.println(new ProducerInstance().getInstance("asd"));
+    private static final String EXCEPTION_NOT_CORRECT_XML_SHEM="Your xml doesn't correct";
+
+    public static void main(String[] args) {
+
+        if(!isCorrectShem("settings.xml")){
+            throw new IllegalArgumentException(EXCEPTION_NOT_CORRECT_XML_SHEM);
+        }
+        ClassProducer classProducer=new ClassProducer();
+
+
+        try ( Crawling crawling= (Crawling) classProducer.getInstance("Crawling")){
+            ProducerURL producerURL=(ProducerURL)classProducer.getInstance("urlProducer");
+            crawling.setUrl(producerURL.getURL());
+            crawling.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
-
-    /**  public static void main(String[] args) throws Exception {
-//    String fileConfigurationName= PropertyLoader.getProperty("file.configuration.name");
-
-        JAXBContext jc=JAXBContext.newInstance(Configuration.class);
-        Configuration configuration;
-        String siteName;
-        if(!isCorrectShem(fileConfigurationName)){
-            System.out.println("Your file isn't correct");
-            return;
-        }
-        try {
-            Unmarshaller u = jc.createUnmarshaller();
-            configuration = (Configuration) u.unmarshal(new File(fileConfigurationName));
-            System.out.println(configuration);
-            System.out.println(configuration.getNewStorage());
-            Producer p=configuration.getProducer();
-            siteName=p.getURL();
-
-        } catch (JAXBException e) {
-           throw new IllegalArgumentException(e);
-        }
-        CrawlingTask dwp=null;
-        try {
-            URL url = new URL(siteName);
-            dwp  =  new CrawlingTask(url,configuration.getNewStorage());
-            dwp.call();
-        } catch (Exception e) {
-
-            System.err.println("You input incorrect site"+e.getMessage());
-        } finally {
-            if (dwp != null) {
-                dwp.stop();
-            }
-
-        }
-
-
-
-    }*/
     private static boolean isCorrectShem(String fileName) {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 

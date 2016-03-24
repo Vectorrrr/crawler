@@ -20,7 +20,7 @@ import java.util.concurrent.*;
  * @author Gladush Ivan
  * @since 16.03.16.
  */
-public class CrawlingTask implements Callable<Void> {
+public class CrawlingTask implements Crawling{
     private static final ExecutorService executor = Executors.newFixedThreadPool(Integer.valueOf(PropertyLoader.getProperty("amount.thread.in.pull")))  ;
 
     /**
@@ -38,8 +38,8 @@ public class CrawlingTask implements Callable<Void> {
     /**
      * Initializes dir for save web page;
      */
-    public CrawlingTask(URL url, Storage storage) {
-        this(url,storage,0,new LinksHolder(),url.getFile());
+    public CrawlingTask() {
+        linksHolder=new LinksHolder();
     }
 
     public CrawlingTask(URL url, Storage storage, int numberLink, LinksHolder linksHolder, String pathToDefaultDirectory) {
@@ -50,6 +50,15 @@ public class CrawlingTask implements Callable<Void> {
         this.storage = storage;
         this.pageId = storage.writePage(url.toString(), pathToDefaultDirectory.replaceAll("/","") + "File from link number" + linkId);
         System.out.println("Download the link number " + numberLink + "URL " + url);
+    }
+
+
+    @Override
+    public void setUrl(URL url){
+        this.url=url;
+        this.pathToDefaultDirectory = url.getFile();
+        this.pageId = storage.writePage(url.toString(), pathToDefaultDirectory.replaceAll("/","") + "File from link number" + linkId);
+
     }
 
     /**
@@ -80,7 +89,8 @@ public class CrawlingTask implements Callable<Void> {
         return null;
     }
 
-    public void stop() {
+    @Override
+    public void close() {
         try {
             System.out.println("attempt to shutdown executor");
             executor.shutdown();
@@ -143,6 +153,10 @@ public class CrawlingTask implements Callable<Void> {
 
     private CrawlingTask crawlingForNextLink(URL url, int numberLink) {
         return new CrawlingTask(url,storage, numberLink, linksHolder, pathToDefaultDirectory);
+    }
+    @Override
+    public String toString(){
+        return "OK"+storage.toString();
     }
 
 }

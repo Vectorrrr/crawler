@@ -1,3 +1,5 @@
+package model;
+
 /**
  * @author Gladush Ivan
  * @since 23.03.16.
