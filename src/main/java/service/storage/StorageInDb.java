@@ -1,5 +1,6 @@
 package service.storage;
 
+import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,18 +98,18 @@ public class StorageInDb implements Storage {
      * and returns the primary key of the record
      */
     @Override
-    public String writePage(String siteURL, String pageName) {
+    public String writePage(URL url) {
+        String urlName = url.toString();
         try {
-            String string = getResultSet(siteURL);
+            String string = getResultSet(urlName);
             if (!EMPTY_STRING.equals(string)) {
                 return string;
             }
-            insertPage(siteURL);
-            return getResultSet(siteURL);
+            insertPage(urlName);
+            return getResultSet(urlName);
         } catch (SQLException e) {
             throw new IllegalArgumentException(EXCEPTION_DO_SQL + e.getMessage());
         }
-
     }
 
     /**

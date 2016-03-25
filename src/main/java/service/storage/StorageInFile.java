@@ -1,6 +1,7 @@
 package service.storage;
 
 import java.io.*;
+import java.net.URL;
 
 /**
  * Class allows to save result in file
@@ -27,17 +28,14 @@ public class StorageInFile implements Storage {
     }
 
 
-    @Override
-    public void close() throws IOException {
-    }
 
     /**
      * Method creates a file which will save the loaded page
      * and return absolute path to this page
      */
     @Override
-    public String writePage(String siteURL, String pageName) {
-        File f = getFile(pageName);
+    public String writePage(URL url) {
+        File f = getFile(url.getFile());
         return f.getAbsolutePath();
     }
 
@@ -76,6 +74,7 @@ public class StorageInFile implements Storage {
 
 
     private File getFile(String pageName) {
+        pageName=pageName.replaceAll("/","");
         File f = new File(PATH_TO_DEFAULT_DIR + pageName);
         try {
             f.createNewFile();
@@ -83,5 +82,10 @@ public class StorageInFile implements Storage {
             throw new IllegalArgumentException(EXCEPTION_CREATE_FILE + e.getMessage());
         }
         return f;
+    }
+
+
+    @Override
+    public void close() throws IOException {
     }
 }

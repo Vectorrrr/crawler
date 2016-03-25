@@ -6,7 +6,7 @@
         </bean>
     </configuration>
     <beans>
-        <bean id="storage" class="service.storage.StorageInFile"/>
+        <bean id="storage" class="service.storage.StorageInDb"/>
         <bean id="urlProducer" class="service.producer.url.ConsoleProducer"/>
     </beans>
 </root>

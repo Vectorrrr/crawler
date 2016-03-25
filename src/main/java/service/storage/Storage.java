@@ -1,6 +1,7 @@
 package service.storage;
 
 import java.io.Closeable;
+import java.net.URL;
 
 
 /**
@@ -14,7 +15,7 @@ public interface Storage extends Closeable,AutoCloseable {
       * retains specific reference table returns a reference
       * to the table in the preservation system
       */
-     String writePage(String siteURL, String pageName);
+     String writePage(URL url);
 
      /**
       * writes a reference to a particular

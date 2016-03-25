@@ -40,10 +40,9 @@ public class ConnectionFactory {
     /**
      * Method returns a connection to the database
      */
+    //todo it's method can be not static, but I think we should not create a new class if we want get connection to db
     public static Connection getConnection() {
-
         return connectionToDataBase;
-
     }
 
     private static Connection createConnection() throws SQLException {
@@ -67,5 +66,6 @@ public class ConnectionFactory {
             }
         }
         sql.execute(CREATE_DB);
+        sql.close();
     }
 }

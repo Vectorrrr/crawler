@@ -7,19 +7,27 @@ import java.util.List;
 
 //todo rewrite commint
 /**
- *class contains instance and names of all the fields and their values in the two lists
+ * class contains instance and names of all the fields and their values in the two lists
  * name and number value in the list equals
  * @author Gladush Ivan
  * @since 23.03.16.
  */
 public class Bean {
     private static final String EXCEPTION_CREATE_PRIMITIVE_TYPE = "I don't support this type";
+
+    /**
+     * Lists are divided into two types,
+     * since we are dealing with strings
+     * and determine what kind of after
+     * thought bin is not possible without
+     * creating additional entities
+     * */
     private List<String> primitiveNames = new ArrayList<>();
     private List<String> primitiveValues = new ArrayList<>();
     private List<String> compositeNames = new ArrayList<>();
     private List<String> compositeValues = new ArrayList<>();
     private String name;
-    private String classPath;
+    private String classPath;//the relative path to class in program
 
     public Bean(String name, String classPath) {
         this.name = name;

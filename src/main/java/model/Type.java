@@ -1,6 +1,8 @@
 package model;
 
 /**
+ * Enum contains all the primitive types
+ * in the program and can convert them into line
  * @author Gladush Ivan
  * @since 23.03.16.
  */
