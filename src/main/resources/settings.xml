@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <bean id="Crawling" class="service.downloads.CrawlingTask">
+        <property name="storage" ref="storage"/>
+    </bean>
+    <bean id="storage" class="service.storage.StorageInDb"/>
+    <bean id="urlProducer" class="service.producer.url.ConsoleProducer"/>
+</configuration>
+
+
+
+
+
+
+

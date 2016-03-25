@@ -1,5 +1,6 @@
 package service.downloads;
 
+import java.io.Closeable;
 import java.net.URL;
 import java.util.concurrent.Callable;
 
@@ -10,7 +11,7 @@ import java.util.concurrent.Callable;
  * @author Gladush Ivan
  * @since 24.03.16.
  */
-public interface Crawling extends Callable<Void>,Cloneable,AutoCloseable {
+public interface Crawling extends Callable<Void>,Closeable,AutoCloseable {
     boolean crawling(URL url);
 
 }

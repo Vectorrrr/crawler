@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static service.property.loader.PropertyLoader.*;
+import static service.property.loader.CrawlerProperties.*;
 
 
 /**
@@ -39,14 +39,14 @@ public class StorageInDb implements Storage {
      * */
     static {
         try (Statement sql = connection.createStatement()) {
-            ResultSet resultSet = sql.executeQuery(getProperty("show.tables.query"));
+            ResultSet resultSet = sql.executeQuery(property("show.tables.query"));
             List<String> existTables = new ArrayList<>();
             while (resultSet.next()) {
                 existTables.add(resultSet.getString(1));
             }
             for (String s : getNeedTables()) {
                 if (!existTables.contains(s)) {
-                    sql.execute(getProperty("create." + s));
+                    sql.execute(property("create." + s));
                 }
             }
         } catch (SQLException e) {
@@ -70,12 +70,12 @@ public class StorageInDb implements Storage {
      * */
     private void createStatements() {
         try {
-            insertInRootPages = connection.prepareStatement(getProperty("insert.root.page"));
-            insertInLink = connection.prepareStatement(getProperty("insert.link.query"));
-            insertInLinkInPage = connection.prepareStatement(getProperty("insert.link.in.page"));
-            insertInContents = connection.prepareStatement(getProperty("insert.root.content"));
-            selectIdRootPage = connection.prepareStatement(getProperty("select.id.root.page"));
-            selectMaxIdLink = connection.prepareStatement(getProperty("select.max.id.link"));
+            insertInRootPages = connection.prepareStatement(property("insert.root.page"));
+            insertInLink = connection.prepareStatement(property("insert.link.query"));
+            insertInLinkInPage = connection.prepareStatement(property("insert.link.in.page"));
+            insertInContents = connection.prepareStatement(property("insert.root.content"));
+            selectIdRootPage = connection.prepareStatement(property("select.id.root.page"));
+            selectMaxIdLink = connection.prepareStatement(property("select.max.id.link"));
         } catch (SQLException e) {
             throw new IllegalStateException(EXCEPTION_CREATE_STATEMENT + e.getMessage());
         }

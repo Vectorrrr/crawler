@@ -4,10 +4,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import model.Bean;
-import service.property.loader.PropertyLoader;
+import service.property.loader.CrawlerProperties;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -33,7 +36,7 @@ public class ClassProducer {
     /**
      * A list which stores all beans
      * */
-    private static List<Bean> beans = new ArrayList<>();
+    private  List<Bean> beans = new ArrayList<>();
 
     /**
      * list shows whether we have used the beans to
@@ -43,30 +46,29 @@ public class ClassProducer {
      * Drafting is not correct, as between the beans have
      * a circular dependency
      */
-    private static List<String> used = new ArrayList<>();
+    private  List<String> used = new ArrayList<>();
 
     /**
      * when the class is loaded into memory, it
      * loads into memory all the beans, then each
      * user, upon request, a new class
      * */
-    static {
+    private ClassProducer(File f)
+            throws Exception {
         SAXParserFactory factory = SAXParserFactory.newInstance();
-        try {
-            SAXParser parser = factory.newSAXParser();
-            SaxHandler handler = new SaxHandler();
-            parser.parse(PropertyLoader.getProperty("file.configuration.name"), handler);
-            checkCycleInBeans();
-        } catch (Exception e) {
-            throw new IllegalStateException(EXCEPTION_BEANS_DOWNLOAD + e.getMessage());
-        }
+        SAXParser parser = factory.newSAXParser();
+        SaxHandler handler = new SaxHandler();
+        parser.parse(f, handler);
+        checkCycleInBeans();
+
     }
+
 
     /**
      * Method check cycle in beans if
      * that method find cycle it throw new Illegal Argument Exception
      * */
-    private static void checkCycleInBeans() {
+    private  void checkCycleInBeans() {
         //bfs for bean
         Deque<Bean> usedBean = new ArrayDeque<>();
         for (Bean b : beans) {
@@ -85,6 +87,14 @@ public class ClassProducer {
         used.clear();
     }
 
+    public static ClassProducer initClassProducer(File file) {
+        try {
+            return new ClassProducer(file);
+        } catch (Exception e) {
+            throw new IllegalStateException(EXCEPTION_BEANS_DOWNLOAD + e.getMessage());
+        }
+    }
+
     /**
      * method checks all fields of beans
      * if the field is empty, he misses it,
@@ -93,7 +103,7 @@ public class ClassProducer {
      * if so then the file is not made correctly
      */
     //todo that good separate logic
-    private static void checkParameters(Deque<Bean> usedBean) {
+    private  void checkParameters(Deque<Bean> usedBean) {
         for (String name : usedBean.pop().getCompositeValues()) {
             if (used.contains(name)) {
                 throw new IllegalArgumentException(EXCEPTION_CYCLE_IN_BEAN_FILE);
@@ -105,7 +115,7 @@ public class ClassProducer {
     }
 
 
-    private static Bean getBeanByName(String name) {
+    private  Bean getBeanByName(String name) {
         for (Bean b : beans) {
             if (b.getName().equals(name)) {
                 return b;
@@ -152,7 +162,7 @@ public class ClassProducer {
      * of this tag
      *
      * */
-    private static final class SaxHandler extends DefaultHandler {
+    private  final class SaxHandler extends DefaultHandler {
         private static final String EXCEPTION_BEAN_IN_BEAN="Your bean file incorrect because bean located in bean";
         private Bean bean;
         private boolean readProperty = false;

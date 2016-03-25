@@ -9,7 +9,7 @@ import java.util.Properties;
  * @author Gladush Ivan
  * @since 18.03.16.
  */
-public class PropertyLoader {
+public class CrawlerProperties {
     private static final String EXCEPTION_DOWNLOAD_PROPERTIES = "I can't download properties";
     private static final String EXCEPTION_PROPETIE_DONT_FOUND = "This property not exist";
     private static Properties properties = new Properties();
@@ -23,7 +23,7 @@ public class PropertyLoader {
     }
 
 
-    public static String getProperty(String propertyKey) {
+    public static String property(String propertyKey) {
         String property = (String) properties.get(propertyKey);
         if (property == null) {
             throw new IllegalStateException(EXCEPTION_PROPETIE_DONT_FOUND);
@@ -32,7 +32,7 @@ public class PropertyLoader {
     }
 
     public static String[] getNeedTables() {
-        return (getProperty("need.tables")).split("-");
+        return (property("need.tables")).split("-");
     }
 
 

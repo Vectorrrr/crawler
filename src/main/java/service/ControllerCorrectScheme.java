@@ -20,7 +20,7 @@ public class ControllerCorrectScheme {
     /**
      * Method checks correct XML scheme by xsd scheme
      * */
-    public static boolean isCorrectXmlScheme(String pathToScheme, String pathToFile){
+    public static boolean isCorrectXmlScheme(String pathToScheme, String pathToFile) {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
         SchemaFactory factory = SchemaFactory.newInstance(language);
@@ -33,14 +33,11 @@ public class ControllerCorrectScheme {
             validator.validate(source);
 
             System.out.println(pathToFile + " is valid.");
-        } catch (IOException e) {
+        } catch (IOException | org.xml.sax.SAXException e) {
             System.err.print("validation " + pathToFile + " is not valid because "
                     + e.getMessage());
             return false;
-        } catch (org.xml.sax.SAXException e) {
-            e.printStackTrace();
         }
         return true;
-
     }
 }

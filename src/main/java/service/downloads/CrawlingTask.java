@@ -1,7 +1,7 @@
 package service.downloads;
 
 import com.sun.istack.internal.Nullable;
-import service.property.loader.PropertyLoader;
+import service.property.loader.CrawlerProperties;
 import service.links.holder.LinksHolder;
 import service.storage.Storage;
 import service.link.processor.LinkProcessor;
@@ -22,7 +22,7 @@ import java.util.concurrent.*;
  */
 public class CrawlingTask implements  Crawling {
     private static final ExecutorService executor = Executors.newFixedThreadPool(
-            Integer.valueOf(PropertyLoader.getProperty("amount.thread.in.pull")));
+            Integer.valueOf(CrawlerProperties.property("amount.thread.in.pull")));
 
 
     private URL url;

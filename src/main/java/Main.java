@@ -2,7 +2,10 @@ import service.ControllerCorrectScheme;
 import service.downloads.Crawling;
 import service.producer.ClassProducer;
 import service.producer.url.ProducerURL;
- import static service.property.loader.PropertyLoader.*;
+
+import java.io.File;
+
+import static service.property.loader.CrawlerProperties.*;
 
 /**
  * @author Gladush Ivan
@@ -10,23 +13,27 @@ import service.producer.url.ProducerURL;
  */
 public class Main {
     private static final String EXCEPTION_NOT_CORRECT_XML_SHEM = "Your xml doesn't correct";
-
+    //todo write strings
     public static void main(String[] args) {
-        if (!ControllerCorrectScheme.isCorrectXmlScheme(getProperty("file.configuration.scheme"), getProperty("file.configuration.name"))) {
+        if (!ControllerCorrectScheme.isCorrectXmlScheme(ClassLoader.getSystemResource(property("file.configuration.scheme")).getFile(),
+                                ClassLoader.getSystemResource(property("file.configuration.name")).getFile())) {
             throw new IllegalArgumentException(EXCEPTION_NOT_CORRECT_XML_SHEM);
         }
-        ClassProducer classProducer = new ClassProducer();
+        ClassProducer classProducer = ClassProducer.initClassProducer(new File(ClassLoader.getSystemResource(property("file.configuration.name")).getFile()));
         try (Crawling crawling = (Crawling) classProducer.getInstance("Crawling")) {
             ProducerURL producerURL = (ProducerURL) classProducer.getInstance("urlProducer");
-          if(crawling.crawling(producerURL.getURL())){
-              System.out.println("Crawling was successful");
-          }else{
-              System.out.println("Crawling was not successful");
-          }
+            if (crawling.crawling(producerURL.getURL())) {
+                System.out.println("Crawling was successful");
+            } else {
+                System.out.println("Crawling was not successful");
+            }
         } catch (Exception e) {
             e.printStackTrace();
+
+
         }
     }
-
-
 }
+
+
+

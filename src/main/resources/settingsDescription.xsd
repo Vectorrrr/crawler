@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:element name="configuration" type="beans"/>
+
+
+
+    <xs:complexType name="beans">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="bean" type="beanType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="propertyType">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="ref" type="xs:string" use="optional"/>
+        <xs:attribute name="value" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="beanType">
+        <xs:sequence minOccurs="0"
+                     maxOccurs="unbounded">
+            <xs:element name="property" type="propertyType"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:attribute name="class" type="xs:string" use="required"/>
+    </xs:complexType>
+
+
+</xs:schema>
+

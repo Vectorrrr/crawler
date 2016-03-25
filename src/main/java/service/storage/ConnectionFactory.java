@@ -1,6 +1,6 @@
 package service.storage;
 
-import service.property.loader.PropertyLoader;
+import service.property.loader.CrawlerProperties;
 
 import java.sql.*;
 
@@ -14,13 +14,13 @@ import java.sql.*;
  * @since 21.03.16.
  */
 public class ConnectionFactory {
-    private static final String DATABASE_NAME = PropertyLoader.getProperty("database.name");
-    private static final String SHOW_DATABASE = PropertyLoader.getProperty("show.database.query");
-    private static final String DB_DRIVER = PropertyLoader.getProperty("db.driver.name");
-    private static final String DB_USER_NAME = PropertyLoader.getProperty("db.user.name");
-    private static final String DB_PASSWORD = PropertyLoader.getProperty("db.user.password");
-    private static final String DB_URL_ADDRESS = PropertyLoader.getProperty("db.url.address");
-    private static final String CREATE_DB = PropertyLoader.getProperty("create.database.query");
+    private static final String DATABASE_NAME = CrawlerProperties.property("database.name");
+    private static final String SHOW_DATABASE = CrawlerProperties.property("show.database.query");
+    private static final String DB_DRIVER = CrawlerProperties.property("db.driver.name");
+    private static final String DB_USER_NAME = CrawlerProperties.property("db.user.name");
+    private static final String DB_PASSWORD = CrawlerProperties.property("db.user.password");
+    private static final String DB_URL_ADDRESS = CrawlerProperties.property("db.url.address");
+    private static final String CREATE_DB = CrawlerProperties.property("create.database.query");
     private static Connection connectionToDataBase;
 
     //todo perhaps worth making the lazy loading
