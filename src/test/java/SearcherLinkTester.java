@@ -53,7 +53,6 @@ public class SearcherLinkTester {
                 "    Watching a Directory for Changes shows how to use the watch service to detect files that are added, removed or updated in one or more directories.\n" +
                 "    Other Useful Methods covers important API that didn't fit elsewhere in the lesson.\n" +
                 "    Legacy File I/O Code shows how to leverage Path functionality if you have older code using the java.io.File class. A table mapping java.io.File API to java.nio.file API is provided.\n";
-        List<String> answer = getLinksForText(text);
 
         checkActualWithExpected(getLinksForText(text), new String[]{});
     }

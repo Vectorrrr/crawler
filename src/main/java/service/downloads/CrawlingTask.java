@@ -20,36 +20,43 @@ import java.util.concurrent.*;
  * @author Gladush Ivan
  * @since 16.03.16.
  */
-public class CrawlingTask implements Callable<Void> {
-    private static final ExecutorService executor = Executors.newFixedThreadPool(Integer.valueOf(PropertyLoader.getProperty("amount.thread.in.pull")))  ;
+public class CrawlingTask implements  Crawling {
+    private static final ExecutorService executor = Executors.newFixedThreadPool(
+            Integer.valueOf(PropertyLoader.getProperty("amount.thread.in.pull")));
 
-    /**
-     * if it is the main, the all link, that finds on this page
-     * we need add to add to the list for further processing
-     */
+
     private URL url;
     private LinksHolder linksHolder;
-    private int linkId ;
+    private int linkId;
     private URL rootURL = null;
-    private String pathToDefaultDirectory;
     private Storage storage;
     private String pageId;
 
     /**
-     * Initializes dir for save web page;
+     * The default constructor is needed in order
+     * to be able to create an instance of an object
      */
-    public CrawlingTask(URL url, Storage storage) {
-        this(url,storage,0,new LinksHolder(),url.getFile());
+    public CrawlingTask() {
     }
 
-    public CrawlingTask(URL url, Storage storage, int numberLink, LinksHolder linksHolder, String pathToDefaultDirectory) {
+    private CrawlingTask(URL url, Storage storage, int numberLink, LinksHolder linksHolder) {
         this.url = url;
         this.linkId = numberLink;
         this.linksHolder = linksHolder;
-        this.pathToDefaultDirectory = pathToDefaultDirectory;
         this.storage = storage;
-        this.pageId = storage.writePage(url.toString(), pathToDefaultDirectory.replaceAll("/","") + "File from link number" + linkId);
-        System.out.println("Download the link number " + numberLink + "URL " + url);
+        this.pageId = storage.writePage(url);
+        System.out.println("Download the link number " + numberLink + "URL " + url);//some logs
+    }
+
+    public boolean crawling(URL url) {
+        try {
+            Future<Void> future = executor.submit(new CrawlingTask(url, this.storage, 0, new LinksHolder()));
+            future.get();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -73,14 +80,15 @@ public class CrawlingTask implements Callable<Void> {
                 asyncProcessChildPages();
             }
         } finally {
-                saveChildLinks();
+            saveChildLinks();
         }
 
 
         return null;
     }
 
-    public void stop() {
+    @Override
+    public void close() {
         try {
             System.out.println("attempt to shutdown executor");
             executor.shutdown();
@@ -142,7 +150,12 @@ public class CrawlingTask implements Callable<Void> {
     }
 
     private CrawlingTask crawlingForNextLink(URL url, int numberLink) {
-        return new CrawlingTask(url,storage, numberLink, linksHolder, pathToDefaultDirectory);
+        return new CrawlingTask(url, storage, numberLink, linksHolder);
+    }
+
+    @Override
+    public String toString() {
+        return "OK" + storage.toString();
     }
 
 }
