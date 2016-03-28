@@ -35,8 +35,4 @@ public class CrawlerProperties {
         return (property("need.tables")).split("-");
     }
 
-
-
-
-
 }

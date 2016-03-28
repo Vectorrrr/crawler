@@ -5,6 +5,7 @@
     </bean>
     <bean id="storage" class="service.storage.StorageInDb"/>
     <bean id="urlProducer" class="service.producer.url.ConsoleProducer"/>
+
 </configuration>
 
 

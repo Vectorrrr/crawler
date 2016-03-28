@@ -2,7 +2,6 @@ package model;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 //todo rewrite commint
@@ -21,7 +20,7 @@ public class Bean {
      * and determine what kind of after
      * thought bin is not possible without
      * creating additional entities
-     * */
+     */
     private List<String> primitiveNames = new ArrayList<>();
     private List<String> primitiveValues = new ArrayList<>();
     private List<String> compositeNames = new ArrayList<>();
@@ -34,11 +33,9 @@ public class Bean {
         this.classPath = classPath;
     }
 
-    public List<String> getCompositeValues() {
-        return Collections.unmodifiableList(compositeValues);
+    public void addPrimitiveName(String name) {
+        primitiveNames.add(name);
     }
-
-    public void addPrimitiveName(String name) { primitiveNames.add(name); }
 
     public void addCompositeName(String name) {
         compositeNames.add(name);

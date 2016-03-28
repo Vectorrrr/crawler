@@ -145,7 +145,6 @@ public class StorageInDb implements Storage {
                 setInsertInContents(rootPage, content);
                 insertInContents.executeUpdate();
             } catch (SQLException e) {
-                System.out.println(content);
                 throw new IllegalStateException(EXCEPTION_DO_SQL + e.getMessage());
             }
         }

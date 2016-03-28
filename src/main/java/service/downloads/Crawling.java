@@ -13,5 +13,4 @@ import java.util.concurrent.Callable;
  */
 public interface Crawling extends Callable<Void>,Closeable,AutoCloseable {
     boolean crawling(URL url);
-
 }

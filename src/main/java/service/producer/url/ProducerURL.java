@@ -8,6 +8,6 @@ import java.net.URL;
  * @since 21.03.16.
  */
 //todo think about generics
-public interface ProducerURL extends AutoCloseable,Closeable{
+public interface ProducerURL extends AutoCloseable,Closeable {
     URL getURL();
 }

@@ -1,6 +1,7 @@
 package service.downloads;
 
 import com.sun.istack.internal.Nullable;
+
 import service.property.loader.CrawlerProperties;
 import service.links.holder.LinksHolder;
 import service.storage.Storage;
@@ -12,6 +13,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import org.apache.log4j.Logger;
+
 
 /**
  * Class allow download page from web and also that class can do it
@@ -24,7 +27,11 @@ public class CrawlingTask implements  Crawling {
     private static final ExecutorService executor = Executors.newFixedThreadPool(
             Integer.valueOf(CrawlerProperties.property("amount.thread.in.pull")));
 
-
+    private static final Logger log = Logger.getLogger(CrawlingTask.class);
+    public static final String EXCEPTION_CREATE_URL = "Create url from string %s exception %s";
+    public static final String EXCEPTION_SHUTDOWN_EXECUTOR = "ExecutorService interrupted exception %s";
+    public static final String DOWNLOAD_THE_LINK_MESSAGE = "Download the link number %d URL %s";
+    public static final String EXCEPTION_IN_CRAWLING = "In %s exception %s";
     private URL url;
     private LinksHolder linksHolder;
     private int linkId;
@@ -45,7 +52,7 @@ public class CrawlingTask implements  Crawling {
         this.linksHolder = linksHolder;
         this.storage = storage;
         this.pageId = storage.writePage(url);
-        System.out.println("Download the link number " + numberLink + "URL " + url);//some logs
+        log.info(String.format(DOWNLOAD_THE_LINK_MESSAGE, numberLink, url));
     }
 
     public boolean crawling(URL url) {
@@ -54,7 +61,7 @@ public class CrawlingTask implements  Crawling {
             future.get();
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(String.format(EXCEPTION_IN_CRAWLING, url, e.getMessage()));
             return false;
         }
     }
@@ -90,17 +97,17 @@ public class CrawlingTask implements  Crawling {
     @Override
     public void close() {
         try {
-            System.out.println("attempt to shutdown executor");
+            log.info("attempt to shutdown executor");
             executor.shutdown();
             executor.awaitTermination(1, TimeUnit.SECONDS);
             storage.close();
         } catch (InterruptedException | IOException e) {
-            System.err.println("tasks interrupted");
+            log.warn(String.format(EXCEPTION_SHUTDOWN_EXECUTOR, e.getMessage()));
         } finally {
             if (!executor.isTerminated()) {
-                System.err.println("cancel non-finished tasks");
+                log.warn("When interrupted ExecutorService, he had several active threads");
             }
-            System.out.println("shutdown finished");
+            log.info("shutdown finished");
         }
     }
 
@@ -144,7 +151,7 @@ public class CrawlingTask implements  Crawling {
             }
             return new URL(link);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            log.error(String.format(EXCEPTION_CREATE_URL, link, e.getMessage()));
             return null;
         }
     }
@@ -152,10 +159,4 @@ public class CrawlingTask implements  Crawling {
     private CrawlingTask crawlingForNextLink(URL url, int numberLink) {
         return new CrawlingTask(url, storage, numberLink, linksHolder);
     }
-
-    @Override
-    public String toString() {
-        return "OK" + storage.toString();
-    }
-
 }

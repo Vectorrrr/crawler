@@ -1,5 +1,7 @@
 package service;
 
+import org.apache.log4j.Logger;
+
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -16,6 +18,8 @@ import java.io.IOException;
  * @since 25.03.16.
  */
 public class ControllerCorrectScheme {
+    private static final Logger log = Logger.getLogger(ControllerCorrectScheme.class);
+    public static final String EXCEPTION_INCORRECT_SCHEME = "Validation %s is not valid because %s";
 
     /**
      * Method checks correct XML scheme by xsd scheme
@@ -34,8 +38,7 @@ public class ControllerCorrectScheme {
 
             System.out.println(pathToFile + " is valid.");
         } catch (IOException | org.xml.sax.SAXException e) {
-            System.err.print("validation " + pathToFile + " is not valid because "
-                    + e.getMessage());
+           log.error(String.format(EXCEPTION_INCORRECT_SCHEME,pathToFile,e.getMessage()));
             return false;
         }
         return true;

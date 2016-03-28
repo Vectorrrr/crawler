@@ -16,11 +16,11 @@ public class ConsoleProducer implements ProducerURL {
     @Override
     public URL getURL() {
         System.out.println("Input Url site ");
-        String s=sc.nextLine();
-        try{
+        String s = sc.nextLine();
+        try {
             return new URL(s);
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("You input incorrect url becouse "+ e.getMessage());
+            throw new IllegalArgumentException("You input incorrect url becouse " + e.getMessage());
         }
     }
 

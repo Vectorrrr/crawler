@@ -19,10 +19,13 @@ public enum Type {
             return s;
         }
     };
+
     private String sing;
-    Type(String sing){
-        this.sing=sing;
+
+    Type(String sing) {
+        this.sing = sing;
     }
+
     public abstract Object getExample(String s);
 
     public String getSing() {
